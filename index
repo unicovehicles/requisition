@@ -1,0 +1,2419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Annex-3: Vehicle Requisition Workflow</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  
+  <style>
+    /* 
+     * Vehicle Requisition Workflow System - Styling
+     * Modern CSS including glassmorphic elements and print styles for A4 layout.
+     */
+
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;1,600&display=swap');
+
+    :root {
+      /* Color system */
+      --primary-hsl: 220, 85%, 57%;
+      --primary: hsl(var(--primary-hsl));
+      --primary-dark: hsl(220, 85%, 45%);
+      --primary-light: hsl(220, 85%, 95%);
+      --secondary: hsl(250, 70%, 55%);
+      --accent: hsl(142, 70%, 45%);
+      --accent-light: hsl(142, 70%, 95%);
+      --danger: hsl(350, 80%, 55%);
+      --danger-light: hsl(350, 80%, 95%);
+      --warning: hsl(38, 92%, 50%);
+      --warning-light: hsl(38, 92%, 95%);
+      --info: hsl(190, 90%, 45%);
+      --info-light: hsl(190, 90%, 95%);
+      
+      --text-main: hsl(210, 30%, 15%);
+      --text-muted: hsl(210, 20%, 45%);
+      
+      --bg-main: hsl(210, 40%, 98%);
+      --bg-card: hsl(0, 0%, 100%);
+      
+      --border-color: hsl(210, 20%, 90%);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 20px;
+      --shadow-sm: 0 2px 4px rgba(0,0,0,0.02);
+      --shadow-md: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 16px -8px rgba(0,0,0,0.05);
+      --shadow-lg: 0 20px 40px -10px rgba(0,0,0,0.08);
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Reset and Global Styles */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    /* Layout */
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-logo {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 800;
+      font-size: 1.25rem;
+      box-shadow: 0 4px 10px rgba(var(--primary-hsl), 0.3);
+    }
+
+    .brand-text h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--text-main), var(--primary-dark));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-text p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .user-controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .role-badge {
+      padding: 0.5rem 1rem;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .role-requester {
+      background-color: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .role-officer {
+      background-color: var(--accent-light);
+      color: var(--accent);
+    }
+
+    .role-select-dropdown {
+      padding: 0.4rem 0.8rem;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      background-color: white;
+      font-family: inherit;
+      font-weight: 500;
+      font-size: 0.85rem;
+      outline: none;
+      cursor: pointer;
+    }
+
+    main {
+      flex: 1;
+      padding: 2rem;
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 2rem;
+    }
+
+    @media (max-width: 900px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .dashboard-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .dashboard-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border-color);
+    }
+
+    .sidebar-nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      width: 100%;
+      padding: 1rem;
+      background: transparent;
+      border: none;
+      border-radius: var(--radius-md);
+      text-align: left;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .sidebar-nav-btn.active {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .sidebar-nav-btn:hover:not(.active) {
+      background: hsl(210, 20%, 95%);
+      color: var(--text-main);
+    }
+
+    .stat-num {
+      font-size: 2.25rem;
+      font-weight: 700;
+      line-height: 1;
+      margin-top: 0.5rem;
+    }
+
+    .list-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .list-filters {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-chip {
+      padding: 0.4rem 1rem;
+      border-radius: 30px;
+      background: white;
+      border: 1px solid var(--border-color);
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .filter-chip.active {
+      background: var(--text-main);
+      color: white;
+      border-color: var(--text-main);
+    }
+
+    .requests-table-container {
+      overflow-x: auto;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      background: white;
+    }
+
+    .requests-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    .requests-table th {
+      background: hsl(210, 20%, 97%);
+      padding: 1rem;
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .requests-table td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.9rem;
+    }
+
+    .requests-table tbody tr {
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .requests-table tbody tr:hover {
+      background-color: var(--primary-light);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 30px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .status-badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .status-pending {
+      background-color: var(--warning-light);
+      color: var(--warning);
+    }
+
+    .status-approved {
+      background-color: var(--accent-light);
+      color: var(--accent);
+    }
+
+    .status-rejected {
+      background-color: var(--danger-light);
+      color: var(--danger);
+    }
+
+    .status-returned {
+      background-color: var(--info-light);
+      color: var(--info);
+    }
+
+    .form-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .form-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: 2.5rem;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-color);
+      margin-bottom: 2rem;
+    }
+
+    .form-title-block {
+      text-align: center;
+      margin-bottom: 2rem;
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 1.5rem;
+    }
+
+    .form-title-block h2 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .form-title-block p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-top: 0.25rem;
+    }
+
+    .form-group-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .form-group-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-color);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width: 600px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .form-col-span-2 {
+      grid-column: span 2;
+    }
+
+    @media (max-width: 600px) {
+      .form-col-span-2 {
+        grid-column: span 1;
+      }
+    }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .form-field label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .form-field input, .form-field select, .form-field textarea {
+      padding: 0.8rem 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      font-size: 0.95rem;
+      outline: none;
+      background-color: hsl(210, 40%, 99%);
+      transition: var(--transition);
+    }
+
+    .form-field input:focus, .form-field select:focus, .form-field textarea:focus {
+      border-color: var(--primary);
+      background-color: white;
+      box-shadow: 0 0 0 3px rgba(var(--primary-hsl), 0.15);
+    }
+
+    .form-field input[readonly], .form-field select[disabled], .form-field textarea[readonly] {
+      background-color: hsl(210, 20%, 95%);
+      border-color: var(--border-color);
+      color: var(--text-muted);
+      cursor: not-allowed;
+    }
+
+    .vehicle-radio-group {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-top: 0.25rem;
+    }
+
+    .vehicle-radio-card {
+      position: relative;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem;
+      text-align: center;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: var(--transition);
+      background: white;
+    }
+
+    .vehicle-radio-card input {
+      position: absolute;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .vehicle-radio-card:hover {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .vehicle-radio-card.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: var(--primary);
+      box-shadow: 0 0 0 2px var(--primary);
+    }
+
+    /* Canvas Signature Area */
+    .signature-box {
+      border: 2px dashed var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      background-color: hsl(210, 30%, 99%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .signature-canvas-wrapper {
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+      width: 100%;
+      max-width: 500px;
+      position: relative;
+    }
+
+    .signature-canvas {
+      display: block;
+      width: 100%;
+      height: 180px;
+      cursor: crosshair;
+      background: transparent;
+      touch-action: none;
+    }
+
+    .signature-controls {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.8rem 1.5rem;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: var(--transition);
+      border: none;
+      outline: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      box-shadow: 0 4px 15px rgba(var(--primary-hsl), 0.25);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(var(--primary-hsl), 0.35);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+    }
+
+    .btn-secondary:hover {
+      background-color: hsl(210, 20%, 95%);
+    }
+
+    .btn-accent {
+      background-color: var(--accent);
+      color: white;
+      box-shadow: 0 4px 10px rgba(142, 70, 45, 0.2);
+    }
+
+    .btn-accent:hover {
+      background-color: hsl(142, 70%, 40%);
+    }
+
+    .btn-danger {
+      background-color: var(--danger);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background-color: hsl(350, 80%, 45%);
+    }
+
+    .btn-warning {
+      background-color: var(--warning);
+      color: white;
+    }
+
+    .btn-warning:hover {
+      background-color: hsl(38, 92%, 40%);
+    }
+
+    .btn-sm {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.8rem;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: flex-end;
+      margin-top: 2rem;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: var(--radius-lg);
+      max-width: 500px;
+      width: 100%;
+      padding: 2rem;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-color);
+      position: relative;
+      animation: modalEnter 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes modalEnter {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+
+    .alert-banner {
+      padding: 1rem;
+      border-radius: var(--radius-md);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+      from { transform: translateY(-10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .alert-success {
+      background: var(--accent-light);
+      color: hsl(142, 80%, 25%);
+      border: 1px solid hsl(142, 40%, 80%);
+    }
+
+    .alert-danger {
+      background: var(--danger-light);
+      color: hsl(350, 80%, 25%);
+      border: 1px solid hsl(350, 40%, 80%);
+    }
+
+    .alert-warning {
+      background: var(--warning-light);
+      color: hsl(38, 92%, 25%);
+      border: 1px solid hsl(38, 40%, 80%);
+    }
+
+    .alert-info {
+      background: var(--info-light);
+      color: hsl(190, 90%, 25%);
+      border: 1px solid hsl(190, 40%, 80%);
+    }
+
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.8s linear infinite;
+      display: inline-block;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* =========================================
+       A4 PRINT STYLING & EXACT PDF FORM LAYOUT
+       ========================================= */
+
+    .a4-preview-container {
+      display: flex;
+      justify-content: center;
+      margin-top: 2rem;
+      margin-bottom: 2rem;
+      overflow-x: auto;
+    }
+
+    .a4-page {
+      width: 210mm;
+      height: 297mm;
+      padding: 15mm;
+      background-color: white;
+      color: black;
+      box-sizing: border-box;
+      font-family: 'Times New Roman', Times, serif;
+      position: relative;
+      border: 1px solid #c0c0c0;
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .a4-header {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+
+    .a4-header h2 {
+      font-size: 18px;
+      font-weight: bold;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+      letter-spacing: 0.5px;
+      font-family: 'Times New Roman', Times, serif;
+    }
+
+    .a4-meta-bar {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      border-bottom: 1px solid black;
+      padding-bottom: 3px;
+    }
+
+    .a4-section-title {
+      font-size: 12px;
+      font-weight: bold;
+      margin-top: 10px;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+    }
+
+    .a4-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 10px;
+    }
+
+    .a4-table th, .a4-table td {
+      border: 1px solid black;
+      padding: 5px 8px;
+      font-size: 11px;
+      font-family: 'Times New Roman', Times, serif;
+      vertical-align: middle;
+    }
+
+    .a4-table th {
+      background-color: #f2f2f2;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .a4-field-label {
+      font-weight: bold;
+      width: 30%;
+      background-color: #fcfcfc;
+    }
+
+    .a4-field-value {
+      width: 70%;
+    }
+
+    .a4-checkbox-group {
+      display: flex;
+      gap: 15px;
+    }
+
+    .a4-checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .a4-box {
+      width: 12px;
+      height: 12px;
+      border: 1px solid black;
+      display: inline-block;
+      position: relative;
+    }
+
+    .a4-box.checked::after {
+      content: '✓';
+      position: absolute;
+      top: -4px;
+      left: 1px;
+      font-size: 11px;
+      font-weight: bold;
+    }
+
+    .a4-signatures-row {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+      margin-bottom: 15px;
+      padding: 0 10px;
+    }
+
+    .a4-sig-col {
+      width: 45%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .a4-sig-placeholder {
+      border-bottom: 1px solid black;
+      width: 100%;
+      height: 45px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      position: relative;
+    }
+
+    .a4-sig-image {
+      max-height: 40px;
+      max-width: 120px;
+      object-fit: contain;
+      margin-bottom: 2px;
+    }
+
+    .a4-sig-label {
+      font-size: 11px;
+      font-weight: bold;
+      margin-top: 5px;
+      text-align: center;
+    }
+
+    .a4-notes {
+      margin-top: auto; 
+      border-top: 1px dashed black;
+      padding-top: 10px;
+      font-size: 10px;
+      line-height: 1.3;
+    }
+
+    .a4-notes-title {
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .a4-notes ol {
+      padding-left: 15px;
+    }
+
+    .a4-notes li {
+      margin-bottom: 2px;
+    }
+
+    @media print {
+      body {
+        background: white;
+        color: black;
+      }
+      
+      .no-print {
+        display: none !important;
+      }
+      
+      .app-container {
+        display: block;
+        min-height: 0;
+      }
+      
+      main {
+        padding: 0;
+        max-width: 100%;
+        margin: 0;
+      }
+      
+      .a4-preview-container {
+        margin: 0;
+        padding: 0;
+        display: block;
+        overflow-x: visible;
+      }
+      
+      .a4-page {
+        border: none;
+        box-shadow: none;
+        margin: 0;
+        padding: 10mm;
+        width: 210mm;
+        height: 297mm;
+        page-break-after: always;
+        box-sizing: border-box;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <header class="no-print">
+      <div class="brand">
+        <div class="brand-logo">VR</div>
+        <div class="brand-text">
+          <h1>Vehicle Requisition System</h1>
+          <p>Unico Hospitals - Official Workflow portal</p>
+        </div>
+      </div>
+      
+      <div style="display: flex; gap: 0.5rem; margin-left: 2rem; margin-right: auto;">
+        <button class="sidebar-nav-btn active" id="nav-dashboard-btn" style="padding: 0.5rem 1rem; width: auto; font-size: 0.85rem;">Dashboard</button>
+        <button class="sidebar-nav-btn" id="nav-new-request-btn" style="padding: 0.5rem 1rem; width: auto; font-size: 0.85rem;">New Request</button>
+      </div>
+      
+      <div class="user-controls">
+        <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 500;">Simulate Actor:</span>
+        <select id="simulated-role" class="role-select-dropdown">
+          <option value="Requester">Requester (Mahfuz)</option>
+          <option value="Officer">Transport Officer (Rahim)</option>
+          <option value="Admin">Department HOD (Admin)</option>
+        </select>
+        
+        <div id="user-role-badge" class="role-badge role-requester">
+          <span style="width: 8px; height: 8px; border-radius: 50%; background-color: currentColor;"></span>
+          Mahfuz (Requester)
+        </div>
+      </div>
+    </header>
+
+    <div id="alert-container" class="no-print" style="max-width: 1400px; width: 100%; margin: 1rem auto 0; padding: 0 2rem;"></div>
+
+    <main>
+      <!-- SCREEN 1: DASHBOARD VIEW -->
+      <section id="screen-dashboard" class="no-print">
+        <div class="dashboard-grid">
+          
+          <div class="dashboard-sidebar">
+            <button class="btn btn-primary" id="dashboard-btn-create" style="width: 100%; padding: 1rem; border-radius: var(--radius-md);">
+              Create Requisition Form
+            </button>
+            
+            <div class="dashboard-card" style="margin-top: 1rem;">
+              <h3 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Active Requisitions</h3>
+              <div class="stat-num" id="stat-total">0</div>
+            </div>
+            
+            <div class="dashboard-card">
+              <h3 style="font-size: 0.85rem; color: var(--warning); text-transform: uppercase;">Pending Approval</h3>
+              <div class="stat-num" id="stat-pending" style="color: var(--warning)">0</div>
+            </div>
+            
+            <div class="dashboard-card">
+              <h3 style="font-size: 0.85rem; color: var(--accent); text-transform: uppercase;">Approved</h3>
+              <div class="stat-num" id="stat-approved" style="color: var(--accent)">0</div>
+            </div>
+          </div>
+          
+          <div class="dashboard-content">
+            <div class="dashboard-card">
+              <div class="list-header">
+                <h2>Requisitions Log</h2>
+                <div class="list-filters">
+                  <button class="filter-chip active" data-filter="All">All</button>
+                  <button class="filter-chip" data-filter="Pending">Pending</button>
+                  <button class="filter-chip" data-filter="Approved">Approved</button>
+                  <button class="filter-chip" data-filter="Rejected">Rejected</button>
+                  <button class="filter-chip" data-filter="Returned">Returned</button>
+                </div>
+              </div>
+
+              <div style="margin-bottom: 1.5rem; position: relative;">
+                <input type="text" id="requests-search" placeholder="Search by Requester, ID, Destination..." style="width: 100%; padding: 0.8rem 1.2rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); font-family: inherit;">
+              </div>
+              
+              <div class="requests-table-container">
+                <table class="requests-table">
+                  <thead>
+                    <tr>
+                      <th>Req ID</th>
+                      <th>Requester Name</th>
+                      <th>Department</th>
+                      <th>Trip Date</th>
+                      <th>Destination</th>
+                      <th>Vehicle</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="requests-table-body">
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SCREEN 2: NEW REQUISITION FORM (Section A) -->
+      <section id="screen-new-request" class="no-print" style="display: none;">
+        <div class="form-container">
+          <div class="form-card">
+            <div class="form-title-block">
+              <h2>Annex-3: Vehicle Requisition Form</h2>
+              <p>Section A: Trip request to be completed by the requester</p>
+            </div>
+            
+            <form id="requisition-form">
+              <div class="form-group-title">Section A: Trip Request Details</div>
+              
+              <div class="form-grid">
+                <div class="form-field">
+                  <label for="requesterNameId">Requester Name & ID *</label>
+                  <input type="text" id="requesterNameId" required placeholder="e.g. Mahfuzur Rahman (ID-4831)">
+                </div>
+                
+                <div class="form-field">
+                  <label for="designationDept">Designation & Department *</label>
+                  <input type="text" id="designationDept" required placeholder="e.g. Senior Officer, Security">
+                </div>
+                
+                <div class="form-field">
+                  <label for="dateOfRequest">Date of Request *</label>
+                  <input type="date" id="dateOfRequest" required>
+                </div>
+                
+                <div class="form-field">
+                  <label for="dateOfTrip">Date of Trip *</label>
+                  <input type="date" id="dateOfTrip" required>
+                </div>
+                
+                <div class="form-field">
+                  <label for="reportingTimePlace">Reporting Time & Place *</label>
+                  <input type="text" id="reportingTimePlace" required placeholder="e.g. 08:30 AM at Main Gate">
+                </div>
+                
+                <div class="form-field">
+                  <label for="destination">Destination *</label>
+                  <input type="text" id="destination" required placeholder="e.g. Dhaka Office">
+                </div>
+                
+                <div class="form-field form-col-span-2">
+                  <label for="detailedPurpose">Detailed Purpose *</label>
+                  <textarea id="detailedPurpose" required rows="3" placeholder="Explain the specific purpose of the trip..."></textarea>
+                </div>
+                
+                <div class="form-field">
+                  <label for="noOfPassengers">Number of Passengers *</label>
+                  <input type="number" id="noOfPassengers" required min="1" placeholder="e.g. 4">
+                </div>
+                
+                <div class="form-field">
+                  <label for="duration">Duration (Hrs/Days) and ETR *</label>
+                  <input type="text" id="duration" required placeholder="e.g. 6 Hours (ETR: 3:00 PM)">
+                </div>
+                
+                <div class="form-field form-col-span-2">
+                  <label>Type of Vehicle Requested *</label>
+                  <div class="vehicle-radio-group">
+                    <div class="vehicle-radio-card" id="card-micro">
+                      <input type="radio" name="vehicleType" value="Micro" id="radio-micro" required>
+                      Microbus
+                    </div>
+                    <div class="vehicle-radio-card" id="card-amb">
+                      <input type="radio" name="vehicleType" value="Ambulance" id="radio-amb">
+                      Ambulance
+                    </div>
+                    <div class="vehicle-radio-card" id="card-car">
+                      <input type="radio" name="vehicleType" value="Car" id="radio-car">
+                      Car / Sedan
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-field">
+                <label>Requester Digital Signature *</label>
+                <div class="signature-box">
+                  <div class="signature-canvas-wrapper">
+                    <canvas id="requester-signature-canvas" class="signature-canvas"></canvas>
+                  </div>
+                  <div class="signature-controls">
+                    <button type="button" class="btn btn-secondary btn-sm" id="clear-requester-sig">Clear Drawing</button>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="btn-group">
+                <button type="button" class="btn btn-secondary" id="back-to-dash-btn">Cancel</button>
+                <button type="submit" class="btn btn-primary">Submit Requisition</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- SCREEN 3: DETAILS AND APPROVAL FORM (Section A Locked + Section B Editable) -->
+      <section id="screen-request-details" class="no-print" style="display: none;">
+        <div class="form-container">
+          
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <button class="btn btn-secondary btn-sm" onclick="navigateTo('dashboard')">← Back to Log</button>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+              <span style="font-weight: 500;">Requisition:</span>
+              <strong id="detail-id-title" style="color: var(--primary); font-size: 1.1rem;">VR-2025-00000</strong>
+              <span id="detail-status-badge" class="status-badge">Pending</span>
+            </div>
+          </div>
+
+          <div id="detail-reject-reason-block" class="alert-banner alert-danger" style="display: none; margin-bottom: 1.5rem;">
+            <div>
+              <strong>Rejection/Correction Note:</strong>
+              <p id="det-reject-reason" style="margin-top: 0.25rem; font-size: 0.9rem;"></p>
+            </div>
+          </div>
+
+          <div class="form-card">
+            <div class="form-group-title">Section A: Trip Request Details (Locked)</div>
+            
+            <div class="form-grid" style="opacity: 0.95;">
+              <div class="form-field">
+                <label>Requester Name & ID</label>
+                <input type="text" id="det-requesterNameId" readonly>
+              </div>
+              
+              <div class="form-field">
+                <label>Designation & Department</label>
+                <input type="text" id="det-designationDept" readonly>
+              </div>
+              
+              <div class="form-field">
+                <label>Date of Request</label>
+                <input type="text" id="det-dateOfRequest" readonly>
+              </div>
+              
+              <div class="form-field">
+                <label>Date of Trip</label>
+                <input type="text" id="det-dateOfTrip" readonly>
+              </div>
+              
+              <div class="form-field">
+                <label>Reporting Time & Place</label>
+                <input type="text" id="det-reportingTimePlace" readonly>
+              </div>
+              
+              <div class="form-field">
+                <label>Destination</label>
+                <input type="text" id="det-destination" readonly>
+              </div>
+              
+              <div class="form-field form-col-span-2">
+                <label>Detailed Purpose</label>
+                <textarea id="det-detailedPurpose" readonly rows="3"></textarea>
+              </div>
+              
+              <div class="form-field">
+                <label>Number of Passengers</label>
+                <input type="text" id="det-noOfPassengers" readonly>
+              </div>
+              
+              <div class="form-field">
+                <label>Duration & ETR</label>
+                <input type="text" id="det-duration" readonly>
+              </div>
+              
+              <div class="form-field">
+                <label>Vehicle Type</label>
+                <input type="text" id="det-vehicleType" readonly>
+              </div>
+
+              <div class="form-field">
+                <label>Requester Signature</label>
+                <div id="det-requester-signature-display" style="padding: 0.5rem; background: #fafafa; border-radius: var(--radius-sm); min-height: 80px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-color)">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-card">
+            <div class="form-group-title">Section B: Office Use Only (Transport Section)</div>
+            
+            <fieldset id="secb-form-fields" style="border: none; padding: 0; margin: 0;">
+              <div class="form-grid">
+                <div class="form-field form-col-span-2">
+                  <label>Vehicle Availability *</label>
+                  <div style="display: flex; gap: 2rem; margin-top: 0.25rem;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal; cursor: pointer;">
+                      <input type="radio" name="det-vehicleAvailability" value="Available" id="avail-yes"> Available
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal; cursor: pointer;">
+                      <input type="radio" name="det-vehicleAvailability" value="Not Available" id="avail-no"> Not Available
+                    </label>
+                  </div>
+                </div>
+                
+                <div class="form-field">
+                  <label for="det-allottedVehicleNo">Allotted Vehicle Registration No. *</label>
+                  <input type="text" id="det-allottedVehicleNo" placeholder="e.g. DHAKA-METRO-GH-11-2233">
+                </div>
+                
+                <div class="form-field">
+                  <label for="det-allottedDriver">Allotted Driver Name *</label>
+                  <input type="text" id="det-allottedDriver" placeholder="e.g. Driver Rahim">
+                </div>
+                
+                <div class="form-field form-col-span-2">
+                  <label for="det-allottingPerson">Allotting Person Designation *</label>
+                  <input type="text" id="det-allottingPerson" placeholder="e.g. Transport Officer In-Charge">
+                </div>
+
+                <div class="form-field" id="draw-officer-sig-wrapper">
+                  <label>Transport Officer Signature *</label>
+                  <div class="signature-box">
+                    <div class="signature-canvas-wrapper">
+                      <canvas id="officer-signature-canvas" class="signature-canvas"></canvas>
+                    </div>
+                    <div class="signature-controls">
+                      <button type="button" class="btn btn-secondary btn-sm" id="clear-officer-sig">Clear Drawing</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-field" id="draw-hod-sig-wrapper">
+                  <label>Dept. Head Sign (Section B Validation / Optional)</label>
+                  <div class="signature-box">
+                    <div class="signature-canvas-wrapper">
+                      <canvas id="hod-signature-canvas" class="signature-canvas"></canvas>
+                    </div>
+                    <div class="signature-controls">
+                      <button type="button" class="btn btn-secondary btn-sm" id="clear-hod-sig">Clear Drawing</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-field" id="display-officer-sig-wrapper">
+                  <label>Transport Officer Signature</label>
+                  <div id="det-officer-signature-display" style="padding: 0.5rem; background: #fafafa; border-radius: var(--radius-sm); min-height: 80px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-color)">
+                  </div>
+                </div>
+
+                <div class="form-field" id="display-hod-sig-wrapper">
+                  <label>Dept. Head Signature (Section B Approval)</label>
+                  <div id="det-hod-signature-display" style="padding: 0.5rem; background: #fafafa; border-radius: var(--radius-sm); min-height: 80px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-color)">
+                  </div>
+                </div>
+
+              </div>
+            </fieldset>
+          </div>
+
+          <div class="btn-group" id="detail-officer-actions" style="display: none;">
+            <button type="button" class="btn btn-danger" id="btn-reject-submit">Reject</button>
+            <button type="button" class="btn btn-warning" id="btn-return-submit">Return for Correction</button>
+            <button type="button" class="btn btn-accent" id="btn-approve-submit">Approve Requisition</button>
+          </div>
+
+          <div class="dashboard-card" id="detail-pdf-download-block" style="display: none; justify-content: space-between; align-items: center; background: var(--accent-light); border-color: hsl(142, 40%, 80%)">
+            <div>
+              <h4 style="color: var(--accent); font-weight: 700;">Requisition Approved & Locked</h4>
+              <p style="font-size: 0.85rem; color: var(--text-muted);">The PDF has been generated and archived in Google Drive.</p>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+              <a id="btn-view-pdf-link" target="_blank" class="btn btn-secondary btn-sm" href="">Open in Drive</a>
+              <button class="btn btn-primary btn-sm" onclick="navigateTo('print-preview', state.selectedRequest.RequestID)">View & Print PDF Form</button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- SCREEN 4: PRINT PREVIEW AND A4 EXPORTER -->
+      <section id="screen-print-preview" style="display: none;">
+        <div class="no-print" style="margin-bottom: 2rem; display: flex; gap: 0.75rem; justify-content: center;">
+          <button class="btn btn-secondary" id="back-from-preview-btn">Back to Details</button>
+          <button class="btn btn-primary" id="btn-print-form">Send to Print / Save PDF</button>
+          <button class="btn btn-accent" id="btn-download-pdf">Compile & Download PDF</button>
+        </div>
+
+        <div class="a4-preview-container">
+          <div id="a4-print-template-node" class="a4-page">
+            
+            <div class="a4-header">
+              <h2>Annex-3: Vehicle Requisition Form</h2>
+            </div>
+            
+            <div class="a4-meta-bar">
+              <div>REQUISITION ID: <span id="print-req-id">-</span></div>
+              <div>TIMESTAMP: <span id="print-timestamp">-</span></div>
+              <div>STATUS: <span id="print-status">-</span></div>
+            </div>
+            
+            <div class="a4-section-title">SECTION A: TRIP REQUEST (To be filled by Requester)</div>
+            
+            <table class="a4-table">
+              <tr>
+                <td class="a4-field-label">Requester Name & ID</td>
+                <td class="a4-field-value" id="print-requester-name">-</td>
+              </tr>
+              <tr>
+                <td class="a4-field-label">Designation & Dept.</td>
+                <td class="a4-field-value" id="print-designation-dept">-</td>
+              </tr>
+              <tr>
+                <td class="a4-field-label">Date of Request</td>
+                <td class="a4-field-value" id="print-req-date">-</td>
+              </tr>
+              <tr>
+                <td class="a4-field-label">Date of Trip</td>
+                <td class="a4-field-value" id="print-trip-date">-</td>
+              </tr>
+              <tr>
+                <td class="a4-field-label">Reporting Time & Place</td>
+                <td class="a4-field-value" id="print-reporting">-</td>
+              </tr>
+              <tr>
+                <td class="a4-field-label">Destination</td>
+                <td class="a4-field-value" id="print-destination">-</td>
+              </tr>
+              <tr>
+                <td class="a4-field-label">Detailed Purpose</td>
+                <td class="a4-field-value" id="print-purpose">-</td>
+              </tr>
+              <tr>
+                <td class="a4-field-label">No. of Passengers</td>
+                <td class="a4-field-value" id="print-passengers">-</td>
+              </tr>
+              <tr>
+                <td class="a4-field-label">Duration (Hrs/Days) and ETR</td>
+                <td class="a4-field-value" id="print-duration">-</td>
+              </tr>
+              <tr>
+                <td class="a4-field-label">Type of Vehicle</td>
+                <td class="a4-field-value">
+                  <div class="a4-checkbox-group">
+                    <div class="a4-checkbox-item">
+                      <div id="print-chk-micro" class="a4-box"></div> <span>Micro</span>
+                    </div>
+                    <div class="a4-checkbox-item">
+                      <div id="print-chk-amb" class="a4-box"></div> <span>Ambulance</span>
+                    </div>
+                    <div class="a4-checkbox-item">
+                      <div id="print-chk-car" class="a4-box"></div> <span>Car</span>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </table>
+            
+            <div class="a4-signatures-row">
+              <div class="a4-sig-col">
+                <div class="a4-sig-placeholder">
+                  <img id="print-img-requester-sig" class="a4-sig-image" src="" alt="Requester Signature">
+                </div>
+                <div class="a4-sig-label">Requester Signature</div>
+              </div>
+              <div class="a4-sig-col">
+                <div class="a4-sig-placeholder">
+                  <img id="print-img-hod-sig" class="a4-sig-image" src="" alt="Dept Head Sign">
+                </div>
+                <div class="a4-sig-label">Dept. Head Sign</div>
+              </div>
+            </div>
+            
+            <div class="a4-section-title">SECTION B: FOR OFFICE USE ONLY (Transport Section)</div>
+            
+            <table class="a4-table">
+              <tr>
+                <td class="a4-field-label">Vehicle Availability</td>
+                <td class="a4-field-value">
+                  <div class="a4-checkbox-group">
+                    <div class="a4-checkbox-item">
+                      <div id="print-chk-avail" class="a4-box"></div> <span>Available</span>
+                    </div>
+                    <div class="a4-checkbox-item">
+                      <div id="print-chk-unavail" class="a4-box"></div> <span>Not Available</span>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td class="a4-field-label">Allotted Vehicle No.</td>
+                <td class="a4-field-value" id="print-allotted-no">-</td>
+              </tr>
+              <tr>
+                <td class="a4-field-label">Allotted Driver</td>
+                <td class="a4-field-value" id="print-allotted-driver">-</td>
+              </tr>
+              <tr>
+                <td class="a4-field-label">Allotting Person</td>
+                <td class="a4-field-value" id="print-allotting">-</td>
+              </tr>
+            </table>
+            
+            <div class="a4-signatures-row" style="justify-content: flex-end;">
+              <div class="a4-sig-col">
+                <div class="a4-sig-placeholder">
+                  <img id="print-img-officer-sig" class="a4-sig-image" src="" alt="Transport Officer Signature">
+                </div>
+                <div class="a4-sig-label">Transport Officer Sign / Dept. Head Sign</div>
+              </div>
+            </div>
+            
+            <div class="a4-notes">
+              <div class="a4-notes-title">Please Note:</div>
+              <ol>
+                <li>All columns must be properly filled and sent to concerned section in hardcopy or through mail to <strong>ruhul.security@unicohospitals.com</strong></li>
+                <li>Organization vehicles are strictly for official use only.</li>
+                <li>The vehicles are sanctioned against the requisition subject to the availability.</li>
+                <li>Submitting requisition for vehicle does not ensure the vehicle, unless the same is confirmed by the concerned section.</li>
+                <li>The requisition for the vehicle should reach concerned section at least 24 hours in advance.</li>
+                <li>Overloading of the vehicle beyond seating capacity and deviation of route may not be permitted beyond a reasonable limit.</li>
+                <li>All the official requisitions must bear the signature of recommending authority i.e HOD/officer, otherwise the requisition may not be entertained.</li>
+                <li>Deviation of route is not permitted.</li>
+              </ol>
+            </div>
+            
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Global App Loader Loader -->
+    <div id="app-loader" class="modal-overlay" style="display: none;">
+      <div class="modal-content" style="max-width: 320px; text-align: center; padding: 2.5rem 1.5rem;">
+        <div class="spinner" style="width: 40px; height: 40px; border-width: 4px; border-top-color: var(--primary); margin-bottom: 1.5rem;"></div>
+        <h3 style="font-weight: 700; margin-bottom: 0.5rem;" id="loader-text">Processing Request...</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted)">Please do not close this window.</p>
+      </div>
+    </div>
+
+    <!-- MODAL 1: REJECTION COMMENT DIALOG -->
+    <div id="reject-modal" class="modal-overlay">
+      <div class="modal-content">
+        <button class="modal-close">&times;</button>
+        <h3 style="font-weight: 800; font-size: 1.3rem; color: var(--danger); margin-bottom: 1rem;">Reject Requisition</h3>
+        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.25rem;">Please provide a reason for rejecting this vehicle requisition. This will be visible to the requester.</p>
+        
+        <div class="form-field" style="margin-bottom: 1.5rem;">
+          <label for="reject-reason-input">Reason for Rejection *</label>
+          <textarea id="reject-reason-input" rows="4" placeholder="Enter reason here..." required style="width: 100%; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-family: inherit; font-size: 0.95rem; padding: 0.8rem;"></textarea>
+        </div>
+        
+        <div class="btn-group">
+          <button class="btn btn-secondary btn-modal-cancel">Cancel</button>
+          <button class="btn btn-danger" id="confirm-reject-btn">Reject Request</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL 2: RETURN FOR CORRECTION DIALOG -->
+    <div id="return-modal" class="modal-overlay">
+      <div class="modal-content">
+        <button class="modal-close">&times;</button>
+        <h3 style="font-weight: 800; font-size: 1.3rem; color: var(--warning); margin-bottom: 1rem;">Return for Correction</h3>
+        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.25rem;">Specify what changes or details the requester needs to correct before this form can be re-evaluated.</p>
+        
+        <div class="form-field" style="margin-bottom: 1.5rem;">
+          <label for="return-reason-input">Correction Required *</label>
+          <textarea id="return-reason-input" rows="4" placeholder="Describe the corrections needed..." required style="width: 100%; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-family: inherit; font-size: 0.95rem; padding: 0.8rem;"></textarea>
+        </div>
+        
+        <div class="btn-group">
+          <button class="btn btn-secondary btn-modal-cancel">Cancel</button>
+          <button class="btn btn-warning" id="confirm-return-btn">Return to User</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * Mock Database for Standalone Local Execution
+     */
+    let mockRequestsDB = [
+      {
+        "RequestID": "VR-2026-00001",
+        "Timestamp": "2026-06-30 10:15:30",
+        "Status": "Approved",
+        "RequesterNameID": "Mahfuzur Rahman (ID-4831)",
+        "DesignationDept": "Senior Officer, Security Dept",
+        "DateofRequest": "2026-06-30",
+        "DateofTrip": "2026-07-02",
+        "ReportingTimePlace": "08:30 AM at Main Gate",
+        "Destination": "Dhaka Central Office",
+        "DetailedPurpose": "Carry security audit files and equipment for annual inspections.",
+        "NoofPassengers": "3",
+        "Duration": "6 Hours",
+        "VehicleType": "Car",
+        "RequesterSignatureURL": "",
+        "VehicleAvailability": "Available",
+        "AllottedVehicleNo": "DHAKA-METRO-GH-11-2233",
+        "AllottedDriver": "Driver Rahim",
+        "AllottingPerson": "Transport Officer",
+        "OfficerSignatureURL": "/mock_signatures/VR-2026-00001_officer.png",
+        "HODSignatureURL": "/mock_signatures/VR-2026-00001_hod.png",
+        "PDFFileURL": "/mock_pdfs/VR-2026-00001_Requisition_Form.pdf",
+        "RejectReason": ""
+      },
+      {
+        "RequestID": "VR-2026-00002",
+        "Timestamp": "2026-06-30 08:58:26",
+        "Status": "Approved",
+        "RequesterNameID": "Mahfuzur Rahman (ID-4831)",
+        "DesignationDept": "Senior Security Inspector",
+        "DateofRequest": "2026-06-30",
+        "DateofTrip": "2026-07-02",
+        "ReportingTimePlace": "08:30 AM at Central Garage",
+        "Destination": "Dhaka Central Office",
+        "DetailedPurpose": "Carry security audit files",
+        "NoofPassengers": "3",
+        "Duration": "6 Hours",
+        "VehicleType": "Car",
+        "RequesterSignatureURL": "/mock_signatures/VR-2026-00002_requester.png",
+        "VehicleAvailability": "Available",
+        "AllottedVehicleNo": "DHAKA-METRO-GH-11-2233",
+        "AllottedDriver": "Driver Rahim",
+        "AllottingPerson": "Transport Officer",
+        "OfficerSignatureURL": "/mock_signatures/VR-2026-00002_officer.png",
+        "HODSignatureURL": "",
+        "PDFFileURL": "/mock_pdfs/VR-2026-00002_Requisition_Form.pdf",
+        "RejectReason": ""
+      },
+      {
+        "RequestID": "VR-2026-00003",
+        "Timestamp": "2026-06-30 09:06:38",
+        "Status": "Pending Transport Approval",
+        "RequesterNameID": "Mahfuzur Rahman (ID-4831)",
+        "DesignationDept": "Senior Security Inspector",
+        "DateofRequest": "2026-06-30",
+        "DateofTrip": "2026-06-30",
+        "ReportingTimePlace": "08:30 AM at Central Garage",
+        "Destination": "Dhaka Central Office",
+        "DetailedPurpose": "fodod ",
+        "NoofPassengers": "2",
+        "Duration": "6 Hours",
+        "VehicleType": "Car",
+        "RequesterSignatureURL": "/mock_signatures/VR-2026-00003_requester.png",
+        "VehicleAvailability": "",
+        "AllottedVehicleNo": "",
+        "AllottedDriver": "",
+        "AllottingPerson": "",
+        "OfficerSignatureURL": "",
+        "HODSignatureURL": "",
+        "PDFFileURL": "",
+        "RejectReason": ""
+      }
+    ];
+
+    /**
+     * Mock Google Apps Script backend framework
+     */
+    const google = {
+      script: {
+        run: {
+          withSuccessHandler: function(callback) {
+            this.onSuccess = callback;
+            return this;
+          },
+          withFailureHandler: function(callback) {
+            this.onFailure = callback;
+            return this;
+          },
+          getRequests: function() {
+            setTimeout(() => {
+              if (this.onSuccess) this.onSuccess(mockRequestsDB);
+            }, 300);
+          },
+          submitRequest: function(formData, sigBase64) {
+            setTimeout(() => {
+              const newId = "VR-" + new Date().getFullYear() + "-" + String(mockRequestsDB.length + 1).padStart(5, '0');
+              const newReq = {
+                RequestID: newId,
+                Timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+                Status: "Pending Transport Approval",
+                RequesterNameID: formData.requesterNameId,
+                DesignationDept: formData.designationDept,
+                DateofRequest: formData.dateOfRequest,
+                DateofTrip: formData.dateOfTrip,
+                ReportingTimePlace: formData.reportingTimePlace,
+                Destination: formData.destination,
+                DetailedPurpose: formData.detailedPurpose,
+                NoofPassengers: formData.noOfPassengers,
+                Duration: formData.duration,
+                VehicleType: formData.vehicleType,
+                RequesterSignatureURL: sigBase64,
+                VehicleAvailability: "",
+                AllottedVehicleNo: "",
+                AllottedDriver: "",
+                AllottingPerson: "",
+                OfficerSignatureURL: "",
+                HODSignatureURL: "",
+                PDFFileURL: "",
+                RejectReason: ""
+              };
+              mockRequestsDB.unshift(newReq);
+              if (this.onSuccess) this.onSuccess({ success: true, requestId: newId });
+            }, 800);
+          },
+          approveRequest: function(requestId, sectionBData, officerSigBase64) {
+            setTimeout(() => {
+              const req = mockRequestsDB.find(r => r.RequestID === requestId);
+              if (req) {
+                req.Status = "Approved";
+                req.VehicleAvailability = sectionBData.vehicleAvailability;
+                req.AllottedVehicleNo = sectionBData.allottedVehicleNo;
+                req.AllottedDriver = sectionBData.allottedDriver;
+                req.AllottingPerson = sectionBData.allottingPerson;
+                req.OfficerSignatureURL = officerSigBase64;
+                req.HODSignatureURL = sectionBData.hodSignatureBase64 || "";
+                if (this.onSuccess) this.onSuccess({ success: true });
+              } else {
+                if (this.onFailure) this.onFailure(new Error("Request not found"));
+              }
+            }, 800);
+          },
+          rejectRequest: function(requestId, reason) {
+            setTimeout(() => {
+              const req = mockRequestsDB.find(r => r.RequestID === requestId);
+              if (req) {
+                req.Status = "Rejected";
+                req.RejectReason = reason;
+                if (this.onSuccess) this.onSuccess({ success: true });
+              }
+            }, 500);
+          },
+          returnForCorrection: function(requestId, reason) {
+            setTimeout(() => {
+              const req = mockRequestsDB.find(r => r.RequestID === requestId);
+              if (req) {
+                req.Status = "Returned for Correction";
+                req.RejectReason = reason;
+                if (this.onSuccess) this.onSuccess({ success: true });
+              }
+            }, 500);
+          },
+          saveGeneratedPDF: function(requestId, pdfBase64) {
+            setTimeout(() => {
+              const req = mockRequestsDB.find(r => r.RequestID === requestId);
+              if (req) {
+                req.PDFFileURL = "mock_pdf_generated.pdf"; // Mocking file save
+                if (this.onSuccess) this.onSuccess({ success: true });
+              }
+            }, 1000);
+          }
+        }
+      }
+    };
+
+    // Application State
+    const state = {
+      view: 'dashboard',
+      requests: [],
+      selectedRequest: null,
+      currentUser: {
+        email: 'requester@hospital.com',
+        name: 'Mahfuz',
+        role: 'Requester'
+      },
+      requesterSigPad: null,
+      officerSigPad: null,
+      hodSigPad: null,
+      activeFilter: 'All'
+    };
+
+    // Signature Drawing Pad Class
+    class SignaturePad {
+      constructor(canvas, clearButton) {
+        this.canvas = canvas;
+        this.clearButton = clearButton;
+        this.ctx = canvas.getContext('2d');
+        this.isDrawing = false;
+        this.hasSigned = false;
+        
+        this.setupCanvas();
+        this.setupListeners();
+      }
+      
+      setupCanvas() {
+        const rect = this.canvas.getBoundingClientRect();
+        this.canvas.width = rect.width * 2;
+        this.canvas.height = rect.height * 2;
+        this.ctx.scale(2, 2);
+        
+        this.ctx.strokeStyle = '#0f172a';
+        this.ctx.lineWidth = 2.5;
+        this.ctx.lineCap = 'round';
+        this.ctx.lineJoin = 'round';
+        
+        this.clear();
+      }
+      
+      setupListeners() {
+        const getPos = (e) => {
+          const rect = this.canvas.getBoundingClientRect();
+          const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+          const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+          return {
+            x: clientX - rect.left,
+            y: clientY - rect.top
+          };
+        };
+        
+        const startDraw = (e) => {
+          e.preventDefault();
+          this.isDrawing = true;
+          const pos = getPos(e);
+          this.ctx.beginPath();
+          this.ctx.moveTo(pos.x, pos.y);
+        };
+        
+        const draw = (e) => {
+          if (!this.isDrawing) return;
+          e.preventDefault();
+          const pos = getPos(e);
+          this.ctx.lineTo(pos.x, pos.y);
+          this.ctx.stroke();
+          this.hasSigned = true;
+        };
+        
+        const stopDraw = () => {
+          this.isDrawing = false;
+        };
+        
+        this.canvas.addEventListener('mousedown', startDraw);
+        this.canvas.addEventListener('mousemove', draw);
+        this.canvas.addEventListener('mouseup', stopDraw);
+        this.canvas.addEventListener('mouseleave', stopDraw);
+        
+        this.canvas.addEventListener('touchstart', startDraw, { passive: false });
+        this.canvas.addEventListener('touchmove', draw, { passive: false });
+        this.canvas.addEventListener('touchend', stopDraw);
+        
+        if (this.clearButton) {
+          this.clearButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.clear();
+          });
+        }
+        
+        window.addEventListener('resize', () => {
+          const prevSig = this.getDataUrl();
+          this.setupCanvas();
+          if (prevSig) {
+            const img = new Image();
+            img.onload = () => {
+              this.ctx.drawImage(img, 0, 0, this.canvas.width/2, this.canvas.height/2);
+              this.hasSigned = true;
+            };
+            img.src = prevSig;
+          }
+        });
+      }
+      
+      clear() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.hasSigned = false;
+      }
+      
+      isEmpty() {
+        return !this.hasSigned;
+      }
+      
+      getDataUrl() {
+        if (this.isEmpty()) return '';
+        return this.canvas.toDataURL('image/png');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      setupAppListeners();
+      loadUserContext();
+      refreshRequestsList();
+    });
+
+    function setupAppListeners() {
+      document.getElementById('simulated-role').addEventListener('change', (e) => {
+        const val = e.target.value;
+        if (val === 'Requester') {
+          state.currentUser = { email: 'requester@hospital.com', name: 'Mahfuz', role: 'Requester' };
+        } else if (val === 'Officer') {
+          state.currentUser = { email: 'officer@hospital.com', name: 'Rahim', role: 'Transport Officer' };
+        } else {
+          state.currentUser = { email: 'admin@hospital.com', name: 'System Admin', role: 'Department Admin' };
+        }
+        updateRoleBadge();
+        navigateTo('dashboard');
+        refreshRequestsList();
+      });
+
+      document.getElementById('nav-dashboard-btn').addEventListener('click', () => navigateTo('dashboard'));
+      document.getElementById('nav-new-request-btn').addEventListener('click', () => navigateTo('new-request'));
+      document.getElementById('dashboard-btn-create').addEventListener('click', () => navigateTo('new-request'));
+      document.getElementById('back-to-dash-btn').addEventListener('click', () => navigateTo('dashboard'));
+      document.getElementById('back-from-preview-btn').addEventListener('click', () => navigateTo('request-details', state.selectedRequest.RequestID));
+      
+      const filterChips = document.querySelectorAll('.filter-chip');
+      filterChips.forEach(chip => {
+        chip.addEventListener('click', (e) => {
+          filterChips.forEach(c => c.classList.remove('active'));
+          e.target.classList.add('active');
+          state.activeFilter = e.target.getAttribute('data-filter');
+          renderRequestsTable();
+        });
+      });
+
+      document.getElementById('requests-search').addEventListener('input', () => {
+        renderRequestsTable();
+      });
+
+      const vehicleCards = document.querySelectorAll('.vehicle-radio-card');
+      vehicleCards.forEach(card => {
+        card.addEventListener('click', () => {
+          vehicleCards.forEach(c => c.classList.remove('selected'));
+          card.classList.add('selected');
+          const radio = card.querySelector('input[type="radio"]');
+          radio.checked = true;
+        });
+      });
+
+      document.getElementById('requisition-form').addEventListener('submit', handleNewRequestSubmit);
+      document.getElementById('btn-approve-submit').addEventListener('click', handleRequestApproval);
+      document.getElementById('btn-reject-submit').addEventListener('click', showRejectModal);
+      document.getElementById('btn-return-submit').addEventListener('click', showReturnModal);
+
+      document.querySelectorAll('.modal-close, .btn-modal-cancel').forEach(el => {
+        el.addEventListener('click', hideModals);
+      });
+
+      document.getElementById('confirm-reject-btn').addEventListener('click', handleRequestReject);
+      document.getElementById('confirm-return-btn').addEventListener('click', handleRequestReturn);
+
+      document.getElementById('btn-download-pdf').addEventListener('click', () => {
+        generateAndDownloadPDF(state.selectedRequest.RequestID);
+      });
+      
+      document.getElementById('btn-print-form').addEventListener('click', () => {
+        window.print();
+      });
+    }
+
+    function navigateTo(viewName, param = null) {
+      state.view = viewName;
+      hideModals();
+      hideAlerts();
+      
+      document.getElementById('screen-dashboard').style.display = 'none';
+      document.getElementById('screen-new-request').style.display = 'none';
+      document.getElementById('screen-request-details').style.display = 'none';
+      document.getElementById('screen-print-preview').style.display = 'none';
+      
+      document.getElementById('nav-dashboard-btn').classList.remove('active');
+      document.getElementById('nav-new-request-btn').classList.remove('active');
+
+      if (viewName === 'dashboard') {
+        document.getElementById('screen-dashboard').style.display = 'block';
+        document.getElementById('nav-dashboard-btn').classList.add('active');
+        renderDashboardStats();
+        renderRequestsTable();
+      } 
+      else if (viewName === 'new-request') {
+        document.getElementById('screen-new-request').style.display = 'block';
+        document.getElementById('nav-new-request-btn').classList.add('active');
+        resetRequisitionForm();
+      } 
+      else if (viewName === 'request-details') {
+        document.getElementById('screen-request-details').style.display = 'block';
+        loadRequestDetailView(param);
+      }
+      else if (viewName === 'print-preview') {
+        document.getElementById('screen-print-preview').style.display = 'block';
+        renderA4PrintTemplate(param);
+      }
+    }
+
+    function renderDashboardStats() {
+      let pendingCount = 0;
+      let approvedCount = 0;
+      let totalCount = state.requests.length;
+
+      state.requests.forEach(r => {
+        if (r.Status === 'Pending Transport Approval') pendingCount++;
+        if (r.Status === 'Approved') approvedCount++;
+      });
+
+      document.getElementById('stat-total').innerText = totalCount;
+      document.getElementById('stat-pending').innerText = pendingCount;
+      document.getElementById('stat-approved').innerText = approvedCount;
+    }
+
+    function renderRequestsTable() {
+      const searchQuery = document.getElementById('requests-search').value.toLowerCase();
+      const tableBody = document.getElementById('requests-table-body');
+      tableBody.innerHTML = '';
+
+      let filtered = state.requests;
+
+      if (state.activeFilter !== 'All') {
+        const statusMap = {
+          'Pending': 'Pending Transport Approval',
+          'Approved': 'Approved',
+          'Rejected': 'Rejected',
+          'Returned': 'Returned for Correction'
+        };
+        filtered = filtered.filter(r => r.Status === statusMap[state.activeFilter]);
+      }
+
+      if (searchQuery) {
+        filtered = filtered.filter(r => 
+          r.RequestID.toLowerCase().includes(searchQuery) ||
+          r.RequesterNameID.toLowerCase().includes(searchQuery) ||
+          r.Destination.toLowerCase().includes(searchQuery) ||
+          r.DesignationDept.toLowerCase().includes(searchQuery)
+        );
+      }
+
+      if (filtered.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">No requisition forms found matching criteria.</td></tr>`;
+        return;
+      }
+
+      filtered.forEach(req => {
+        const tr = document.createElement('tr');
+        
+        let statusClass = 'status-pending';
+        if (req.Status === 'Approved') statusClass = 'status-approved';
+        if (req.Status === 'Rejected') statusClass = 'status-rejected';
+        if (req.Status.includes('Correction')) statusClass = 'status-returned';
+
+        const tripDate = req.DateofTrip ? req.DateofTrip.split(' ')[0] : '-';
+
+        tr.innerHTML = `
+          <td style="font-weight: 700; color: var(--primary);">${req.RequestID}</td>
+          <td>${req.RequesterNameID.split('&')[0] || req.RequesterNameID}</td>
+          <td>${req.DesignationDept.split('&')[1] || req.DesignationDept}</td>
+          <td>${tripDate}</td>
+          <td>${req.Destination}</td>
+          <td>${req.VehicleType}</td>
+          <td><span class="status-badge ${statusClass}">${req.Status}</span></td>
+        `;
+
+        tr.addEventListener('click', () => {
+          navigateTo('request-details', req.RequestID);
+        });
+
+        tableBody.appendChild(tr);
+      });
+    }
+
+    function resetRequisitionForm() {
+      document.getElementById('requisition-form').reset();
+      
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('dateOfRequest').value = today;
+
+      const vehicleCards = document.querySelectorAll('.vehicle-radio-card');
+      vehicleCards.forEach(c => c.classList.remove('selected'));
+      
+      const canvas = document.getElementById('requester-signature-canvas');
+      const clearBtn = document.getElementById('clear-requester-sig');
+      state.requesterSigPad = new SignaturePad(canvas, clearBtn);
+    }
+
+    function loadRequestDetailView(requestId) {
+      const req = state.requests.find(r => r.RequestID === requestId);
+      if (!req) {
+        showAlert('danger', `Request ${requestId} not found.`);
+        navigateTo('dashboard');
+        return;
+      }
+      
+      state.selectedRequest = req;
+
+      document.getElementById('detail-id-title').innerText = req.RequestID;
+      const statusEl = document.getElementById('detail-status-badge');
+      statusEl.className = 'status-badge';
+      
+      let statusClass = 'status-pending';
+      if (req.Status === 'Approved') statusClass = 'status-approved';
+      if (req.Status === 'Rejected') statusClass = 'status-rejected';
+      if (req.Status.includes('Correction')) statusClass = 'status-returned';
+      statusEl.classList.add(statusClass);
+      statusEl.innerText = req.Status;
+
+      document.getElementById('det-requesterNameId').value = req.RequesterNameID || '';
+      document.getElementById('det-designationDept').value = req.DesignationDept || '';
+      document.getElementById('det-dateOfRequest').value = req.DateofRequest ? req.DateofRequest.split(' ')[0] : '';
+      document.getElementById('det-dateOfTrip').value = req.DateofTrip ? req.DateofTrip.split(' ')[0] : '';
+      document.getElementById('det-reportingTimePlace').value = req.ReportingTimePlace || '';
+      document.getElementById('det-destination').value = req.Destination || '';
+      document.getElementById('det-detailedPurpose').value = req.DetailedPurpose || '';
+      document.getElementById('det-noOfPassengers').value = req.NoofPassengers || '';
+      document.getElementById('det-duration').value = req.Duration || '';
+      document.getElementById('det-vehicleType').value = req.VehicleType || '';
+
+      const sigWrapper = document.getElementById('det-requester-signature-display');
+      if (req.RequesterSignatureURL) {
+        sigWrapper.innerHTML = `<img src="${req.RequesterSignatureURL}" style="max-height: 80px; max-width: 250px; border-bottom: 1px solid var(--border-color);" alt="Requester Signature" onerror="this.src='https://placehold.co/200x80/f8f9fa/212529?text=Signature'">`;
+      } else {
+        sigWrapper.innerHTML = `<span style="font-style: italic; color: var(--text-muted)">No digital signature provided.</span>`;
+      }
+
+      const secBFields = document.getElementById('secb-form-fields');
+      const actionButtons = document.getElementById('detail-officer-actions');
+      const pdfDownloadBlock = document.getElementById('detail-pdf-download-block');
+      const rejectReasonBlock = document.getElementById('detail-reject-reason-block');
+
+      document.getElementById('det-allottedVehicleNo').value = req.AllottedVehicleNo || '';
+      document.getElementById('det-allottedDriver').value = req.AllottedDriver || '';
+      document.getElementById('det-allottingPerson').value = req.AllottingPerson || '';
+      
+      if (req.VehicleAvailability === 'Available') {
+        document.getElementById('avail-yes').checked = true;
+      } else if (req.VehicleAvailability === 'Not Available') {
+        document.getElementById('avail-no').checked = true;
+      } else {
+        document.getElementById('avail-yes').checked = false;
+        document.getElementById('avail-no').checked = false;
+      }
+
+      if (req.RejectReason) {
+        rejectReasonBlock.style.display = 'block';
+        document.getElementById('det-reject-reason').innerText = req.RejectReason;
+      } else {
+        rejectReasonBlock.style.display = 'none';
+      }
+
+      document.getElementById('det-officer-signature-display').innerHTML = '';
+      document.getElementById('det-hod-signature-display').innerHTML = '';
+
+      const isOfficer = state.currentUser.role === 'Transport Officer' || state.currentUser.role === 'Department Admin';
+      const isPending = req.Status === 'Pending Transport Approval' || req.Status === 'Returned for Correction';
+
+      if (isPending && isOfficer) {
+        secBFields.removeAttribute('disabled');
+        actionButtons.style.display = 'flex';
+        pdfDownloadBlock.style.display = 'none';
+
+        document.getElementById('draw-officer-sig-wrapper').style.display = 'flex';
+        document.getElementById('draw-hod-sig-wrapper').style.display = 'flex';
+
+        const officerCanvas = document.getElementById('officer-signature-canvas');
+        const officerClearBtn = document.getElementById('clear-officer-sig');
+        state.officerSigPad = new SignaturePad(officerCanvas, officerClearBtn);
+
+        const hodCanvas = document.getElementById('hod-signature-canvas');
+        const hodClearBtn = document.getElementById('clear-hod-sig');
+        state.hodSigPad = new SignaturePad(hodCanvas, hodClearBtn);
+      } 
+      else {
+        secBFields.setAttribute('disabled', 'true');
+        actionButtons.style.display = 'none';
+
+        document.getElementById('draw-officer-sig-wrapper').style.display = 'none';
+        document.getElementById('draw-hod-sig-wrapper').style.display = 'none';
+
+        if (req.OfficerSignatureURL) {
+          document.getElementById('det-officer-signature-display').innerHTML = `<img src="${req.OfficerSignatureURL}" style="max-height: 80px; max-width: 250px; border-bottom: 1px solid var(--border-color);" alt="Officer Signature" onerror="this.src='https://placehold.co/200x80/f8f9fa/212529?text=Signature'">`;
+        }
+        
+        if (req.HODSignatureURL) {
+          document.getElementById('det-hod-signature-display').innerHTML = `<img src="${req.HODSignatureURL}" style="max-height: 80px; max-width: 250px; border-bottom: 1px solid var(--border-color);" alt="HOD Signature" onerror="this.src='https://placehold.co/200x80/f8f9fa/212529?text=Signature'">`;
+        }
+
+        if (req.Status === 'Approved') {
+          pdfDownloadBlock.style.display = 'flex';
+          const linkBtn = document.getElementById('btn-view-pdf-link');
+          if (req.PDFFileURL) {
+            linkBtn.setAttribute('href', req.PDFFileURL);
+            linkBtn.style.display = 'inline-flex';
+          } else {
+            linkBtn.style.display = 'none';
+          }
+        } else {
+          pdfDownloadBlock.style.display = 'none';
+        }
+      }
+    }
+
+    function renderA4PrintTemplate(requestId) {
+      const req = state.requests.find(r => r.RequestID === requestId);
+      if (!req) return;
+
+      document.getElementById('print-req-id').innerText = req.RequestID;
+      document.getElementById('print-timestamp').innerText = req.Timestamp || '';
+      document.getElementById('print-status').innerText = req.Status || '';
+
+      document.getElementById('print-requester-name').innerText = req.RequesterNameID || '';
+      document.getElementById('print-designation-dept').innerText = req.DesignationDept || '';
+      document.getElementById('print-req-date').innerText = req.DateofRequest ? req.DateofRequest.split(' ')[0] : '';
+      document.getElementById('print-trip-date').innerText = req.DateofTrip ? req.DateofTrip.split(' ')[0] : '';
+      document.getElementById('print-reporting').innerText = req.ReportingTimePlace || '';
+      document.getElementById('print-destination').innerText = req.Destination || '';
+      document.getElementById('print-purpose').innerText = req.DetailedPurpose || '';
+      document.getElementById('print-passengers').innerText = req.NoofPassengers || '';
+      document.getElementById('print-duration').innerText = req.Duration || '';
+
+      document.getElementById('print-chk-micro').className = req.VehicleType === 'Micro' ? 'a4-box checked' : 'a4-box';
+      document.getElementById('print-chk-amb').className = req.VehicleType === 'Ambulance' ? 'a4-box checked' : 'a4-box';
+      document.getElementById('print-chk-car').className = req.VehicleType === 'Car' ? 'a4-box checked' : 'a4-box';
+
+      document.getElementById('print-chk-avail').className = req.VehicleAvailability === 'Available' ? 'a4-box checked' : 'a4-box';
+      document.getElementById('print-chk-unavail').className = req.VehicleAvailability === 'Not Available' ? 'a4-box checked' : 'a4-box';
+      document.getElementById('print-allotted-no').innerText = req.AllottedVehicleNo || '';
+      document.getElementById('print-allotted-driver').innerText = req.AllottedDriver || '';
+      document.getElementById('print-allotting').innerText = req.AllottingPerson || '';
+
+      const pReqSig = document.getElementById('print-img-requester-sig');
+      if (req.RequesterSignatureURL) {
+        pReqSig.src = req.RequesterSignatureURL;
+        pReqSig.style.display = 'block';
+      } else {
+        pReqSig.style.display = 'none';
+      }
+
+      const pOfficerSig = document.getElementById('print-img-officer-sig');
+      if (req.OfficerSignatureURL) {
+        pOfficerSig.src = req.OfficerSignatureURL;
+        pOfficerSig.style.display = 'block';
+      } else {
+        pOfficerSig.style.display = 'none';
+      }
+
+      const pHodSig = document.getElementById('print-img-hod-sig');
+      if (req.HODSignatureURL) {
+        pHodSig.src = req.HODSignatureURL;
+        pHodSig.style.display = 'block';
+      } else {
+        pHodSig.style.display = 'none';
+      }
+    }
+
+    function handleNewRequestSubmit(e) {
+      e.preventDefault();
+      
+      if (state.requesterSigPad.isEmpty()) {
+        showAlert('danger', 'Please provide your digital signature before submitting.');
+        return;
+      }
+
+      showLoader(true, 'Submitting requisition request...');
+
+      const formData = {
+        requesterNameId: document.getElementById('requesterNameId').value,
+        designationDept: document.getElementById('designationDept').value,
+        dateOfRequest: document.getElementById('dateOfRequest').value,
+        dateOfTrip: document.getElementById('dateOfTrip').value,
+        reportingTimePlace: document.getElementById('reportingTimePlace').value,
+        destination: document.getElementById('destination').value,
+        detailedPurpose: document.getElementById('detailedPurpose').value,
+        noOfPassengers: document.getElementById('noOfPassengers').value,
+        duration: document.getElementById('duration').value,
+        vehicleType: document.querySelector('input[name="vehicleType"]:checked').value
+      };
+
+      const sigBase64 = state.requesterSigPad.getDataUrl();
+
+      google.script.run
+        .withSuccessHandler((response) => {
+          showLoader(false);
+          if (response.success) {
+            showAlert('success', `Requisition form submitted successfully! Requisition ID: ${response.requestId}`);
+            refreshRequestsList();
+            navigateTo('dashboard');
+          } else {
+            showAlert('danger', 'Failed to submit request: ' + response.message);
+          }
+        })
+        .withFailureHandler((error) => {
+          showLoader(false);
+          showAlert('danger', 'Server connection failure: ' + error.message);
+        })
+        .submitRequest(formData, sigBase64);
+    }
+
+    function handleRequestApproval(e) {
+      e.preventDefault();
+
+      const allottedVehicleNo = document.getElementById('det-allottedVehicleNo').value;
+      const allottedDriver = document.getElementById('det-allottedDriver').value;
+      const allottingPerson = document.getElementById('det-allottingPerson').value;
+      const availEl = document.querySelector('input[name="det-vehicleAvailability"]:checked');
+
+      if (!availEl) {
+        showAlert('danger', 'Please confirm vehicle availability.');
+        return;
+      }
+
+      const availability = availEl.value;
+
+      if (availability === 'Available' && (!allottedVehicleNo || !allottedDriver || !allottingPerson)) {
+        showAlert('danger', 'Please fill out vehicle registration, driver name, and approving person details.');
+        return;
+      }
+
+      if (state.officerSigPad.isEmpty()) {
+        showAlert('danger', 'Transport Officer signature is required for approval.');
+        return;
+      }
+
+      showLoader(true, 'Approving requisition and compiling PDF...');
+
+      const sectionBData = {
+        vehicleAvailability: availability,
+        allottedVehicleNo: allottedVehicleNo,
+        allottedDriver: allottedDriver,
+        allottingPerson: allottingPerson,
+        hodSignatureBase64: state.hodSigPad.getDataUrl() 
+      };
+
+      const officerSigBase64 = state.officerSigPad.getDataUrl();
+      const requestId = state.selectedRequest.RequestID;
+
+      google.script.run
+        .withSuccessHandler((response) => {
+          if (response.success) {
+            compileAndUploadPDF(requestId, () => {
+              showLoader(false);
+              showAlert('success', `Request ${requestId} approved and signed successfully. PDF generated.`);
+              refreshRequestsList();
+              navigateTo('dashboard');
+            });
+          } else {
+            showLoader(false);
+            showAlert('danger', 'Failed to approve request: ' + response.message);
+          }
+        })
+        .withFailureHandler((error) => {
+          showLoader(false);
+          showAlert('danger', 'Server connection failure: ' + error.message);
+        })
+        .approveRequest(requestId, sectionBData, officerSigBase64);
+    }
+
+    function refreshRequestsList() {
+      google.script.run
+        .withSuccessHandler((requests) => {
+          state.requests = requests;
+          renderDashboardStats();
+          renderRequestsTable();
+          
+          if (state.view === 'request-details' && state.selectedRequest) {
+            loadRequestDetailView(state.selectedRequest.RequestID);
+          }
+        })
+        .withFailureHandler((error) => {
+          showAlert('danger', 'Failed to fetch database records: ' + error.message);
+        })
+        .getRequests();
+    }
+
+    function showRejectModal() {
+      document.getElementById('reject-modal').style.display = 'flex';
+    }
+
+    function showReturnModal() {
+      document.getElementById('return-modal').style.display = 'flex';
+    }
+
+    function hideModals() {
+      document.getElementById('reject-modal').style.display = 'none';
+      document.getElementById('return-modal').style.display = 'none';
+      document.getElementById('reject-reason-input').value = '';
+      document.getElementById('return-reason-input').value = '';
+    }
+
+    function handleRequestReject() {
+      const reason = document.getElementById('reject-reason-input').value;
+      if (!reason.trim()) {
+        showAlert('warning', 'Please enter a reason for rejection.');
+        return;
+      }
+
+      showLoader(true, 'Updating request status to Rejected...');
+      const requestId = state.selectedRequest.RequestID;
+
+      google.script.run
+        .withSuccessHandler((response) => {
+          showLoader(false);
+          if (response.success) {
+            showAlert('success', `Request ${requestId} rejected.`);
+            refreshRequestsList();
+            navigateTo('dashboard');
+          }
+        })
+        .withFailureHandler((error) => {
+          showLoader(false);
+          showAlert('danger', 'Server connection error: ' + error.message);
+        })
+        .rejectRequest(requestId, reason);
+    }
+
+    function handleRequestReturn() {
+      const reason = document.getElementById('return-reason-input').value;
+      if (!reason.trim()) {
+        showAlert('warning', 'Please enter a reason for returning the form.');
+        return;
+      }
+
+      showLoader(true, 'Returning form for correction...');
+      const requestId = state.selectedRequest.RequestID;
+
+      google.script.run
+        .withSuccessHandler((response) => {
+          showLoader(false);
+          if (response.success) {
+            showAlert('success', `Request ${requestId} returned to requester for correction.`);
+            refreshRequestsList();
+            navigateTo('dashboard');
+          }
+        })
+        .withFailureHandler((error) => {
+          showLoader(false);
+          showAlert('danger', 'Server connection error: ' + error.message);
+        })
+        .returnForCorrection(requestId, reason);
+    }
+
+    function compileAndUploadPDF(requestId, callback) {
+      renderA4PrintTemplate(requestId);
+
+      const element = document.getElementById('a4-print-template-node');
+      
+      const opt = {
+        margin: 0,
+        filename: `${requestId}_Requisition_Form.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+
+      html2pdf().from(element).set(opt).outputPdf('datauristring').then(function(pdfBase64) {
+        google.script.run
+          .withSuccessHandler((response) => {
+            if (callback) callback();
+          })
+          .withFailureHandler((error) => {
+            console.error('PDF Upload Error:', error);
+            showAlert('warning', 'Requisition was approved but PDF failed to mock upload: ' + error.message);
+            if (callback) callback();
+          })
+          .saveGeneratedPDF(requestId, pdfBase64);
+      });
+    }
+
+    function generateAndDownloadPDF(requestId) {
+      renderA4PrintTemplate(requestId);
+      const element = document.getElementById('a4-print-template-node');
+      
+      const opt = {
+        margin: 0,
+        filename: `${requestId}_Requisition_Form.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+
+      html2pdf().from(element).set(opt).save();
+    }
+
+    function showLoader(show, text = 'Processing...') {
+      const loader = document.getElementById('app-loader');
+      document.getElementById('loader-text').innerText = text;
+      loader.style.display = show ? 'flex' : 'none';
+    }
+
+    function showAlert(type, message) {
+      const alertContainer = document.getElementById('alert-container');
+      alertContainer.innerHTML = `
+        <div class="alert-banner alert-${type}">
+          <span><strong>${type === 'success' ? 'Success: ' : 'Alert: '}</strong>${message}</span>
+          <button onclick="hideAlerts()" style="background:none; border:none; margin-left:auto; cursor:pointer; font-weight:700; color:inherit;">×</button>
+        </div>
+      `;
+      alertContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function hideAlerts() {
+      document.getElementById('alert-container').innerHTML = '';
+    }
+
+    function loadUserContext() {
+      const select = document.getElementById('simulated-role');
+      if (state.currentUser.role === 'Transport Officer') {
+        select.value = 'Officer';
+      } else if (state.currentUser.role === 'Department Admin') {
+        select.value = 'Admin';
+      } else {
+        select.value = 'Requester';
+      }
+      updateRoleBadge();
+    }
+
+    function updateRoleBadge() {
+      const badge = document.getElementById('user-role-badge');
+      badge.className = 'role-badge';
+      
+      let roleClass = 'role-requester';
+      if (state.currentUser.role === 'Transport Officer' || state.currentUser.role === 'Department Admin') {
+        roleClass = 'role-officer';
+      }
+      
+      badge.classList.add(roleClass);
+      badge.innerHTML = `
+        <span style="width: 8px; height: 8px; border-radius: 50%; background-color: currentColor;"></span>
+        ${state.currentUser.name} (${state.currentUser.role})
+      `;
+    }
+  </script>
+</body>
+</html>
